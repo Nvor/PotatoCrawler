@@ -1,11 +1,12 @@
-﻿using PotatoCrawler.Dtos;
+﻿using Microsoft.Playwright;
+using PotatoCrawler.Dtos;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace PotatoCrawler.Scraper.ScrapeSources
+namespace PotatoCrawler.Scraping.ScrapeSources
 {
     /// <summary>
     /// Quick scrape to discover further sources.
@@ -15,9 +16,10 @@ namespace PotatoCrawler.Scraper.ScrapeSources
     {
         public string SourceName { get; } = "Google";
 
-        public Task Scrape(QueryDto query)
+        public async Task Scrape(IBrowser browser, QueryDto query)
         {
-            return Task.CompletedTask;
+            var page = await browser.NewPageAsync();
+            await page.GotoAsync("https://google.com/search?q=Joe+Biden");
         }
     }
 }
