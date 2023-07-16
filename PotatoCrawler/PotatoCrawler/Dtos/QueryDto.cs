@@ -13,5 +13,7 @@ namespace PotatoCrawler.Dtos
         
         // Optional data points for precision
         public string[]? Miscellaneous { get; set; }
+
+        public string? DumpLocation { get; set; }
     }
 }
