@@ -1,4 +1,7 @@
-﻿using Microsoft.Playwright;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Playwright;
+using PotatoCrawler.Dtos;
 using PotatoCrawler.Helpers;
 using PotatoCrawler.Scraping;
 
@@ -10,32 +13,30 @@ namespace PotatoCrawler
 
         static async Task Main(string[] args)
         {
-            
+            HostApplicationBuilder builder = Host.CreateApplicationBuilder(args);
+
+            IConfiguration config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .AddEnvironmentVariables()
+                .Build();
+
+            builder.Configuration.Sources.Clear();
+            builder.Configuration.AddConfiguration(config);
+
+            var settings = config.GetRequiredSection("Settings").Get<Settings>();
+
+            using IHost host = builder.Build();
 
             Console.WriteLine("EXECUTING POTATO CRAWLER");
             Thread.Sleep(250);
 
             var query = QueryBuilder.BuildQuery();
+            if (settings != null)
+            {
+                query.DumpLocation = settings.DumpLocation;
+            }
 
-            //Console.WriteLine("\nSearch Parameters:\n--------------------");
-            //Console.WriteLine($"Selected name: {query.FullName}");
-
-            //Console.WriteLine("Selected locations:");
-            //if (query.Locations != null && query.Locations.Length > 0)
-            //{
-            //    for (int i = 0; i < query.Locations.Length; i++)
-            //    {
-            //        Console.WriteLine($"{i + 1}. {query.Locations[i]}");
-            //    }
-            //}
-            //else Console.WriteLine("None");
-            
-            ////foreach (var location in query.Locations)
-            ////{
-            ////    Console.WriteLine($"Selected locations: {location} ");
-            ////}
-
-            //Console.WriteLine($"\nInitiating search for {query.FullName}...");
+            InitiateSummary(query);
 
             //using var playwright = await Playwright.CreateAsync();
 
@@ -60,5 +61,27 @@ namespace PotatoCrawler
             var scraper = new Scraper();
             await scraper.Handle(query);
         }
+
+        private static void InitiateSummary(QueryDto query)
+        {
+            Console.Clear();
+            Console.WriteLine($"Selected name: {query.FullName}");
+            Console.WriteLine("Selected locations:");
+            if (query.Locations != null && query.Locations.Length > 0)
+            {
+                for (int i = 0; i < query.Locations.Length; i++)
+                {
+                    Console.WriteLine($"{i + 1}. {query.Locations[i]}");
+                }
+            }
+            else Console.WriteLine("None");
+            Console.WriteLine($"\nInitiating search for {query.FullName}...");
+            Console.WriteLine($"Dumping content at: {query.DumpLocation}");
+        }
+    }
+
+    public class Settings
+    {
+        public required string DumpLocation { get; set; }
     }
 }
