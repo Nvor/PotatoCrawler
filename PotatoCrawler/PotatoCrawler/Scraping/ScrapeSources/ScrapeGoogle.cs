@@ -1,5 +1,6 @@
 ﻿using Microsoft.Playwright;
 using PotatoCrawler.Dtos;
+using PotatoCrawler.Scraping.ScrapeSources.Dtos;
 using PotatoCrawler.Scraping.ScrapeSources.Parsers;
 using System;
 using System.Collections.Generic;
@@ -25,10 +26,26 @@ namespace PotatoCrawler.Scraping.ScrapeSources
             await page.GotoAsync($"https://google.com/search?q={name}");
 
             await page.ScreenshotAsync(new() { Path = query.DumpLocation + "google.png" });
-            var html = await page.ContentAsync();
+            //var html = await page.ContentAsync();
 
-            var parser = new GoogleHtmlParser();
-            var links = parser.ParseHtml(html);
+            var content = new GoogleContent();
+            content.InstagramRefs = new List<string>();
+
+            var links = page.Locator("a:visible");
+            for (int i = 0; i < await links.CountAsync(); i++)
+            {
+                var targetLink = await links.Nth(i).GetAttributeAsync("href");
+                if (!string.IsNullOrEmpty(targetLink) && targetLink.Contains("instagram"))
+                {
+                    content.InstagramRefs.Add(targetLink);
+
+                    Console.WriteLine(targetLink);
+                    await page.GotoAsync(targetLink);
+                    Thread.Sleep(2000);
+                    await page.ScreenshotAsync(new() { Path = query.DumpLocation + "instagram.png" });
+                    break;
+                }
+            }
         }
 
         private string FormatNameForQuery(string fullName)
