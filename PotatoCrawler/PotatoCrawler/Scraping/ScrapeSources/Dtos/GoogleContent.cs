@@ -8,8 +8,8 @@ namespace PotatoCrawler.Scraping.ScrapeSources.Dtos
 {
     internal class GoogleContent : IContent
     {
-        public string[]? InstagramRefs { get; set; }
-        public string[]? TwitterRefs { get; set; }
-        public string[]? FacebookRefs { get; set; }
+        public IList<string>? InstagramRefs { get; set; }
+        public IList<string>? TwitterRefs { get; set; }
+        public IList<string>? FacebookRefs { get; set; }
     }
 }
